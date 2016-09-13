@@ -18,5 +18,5 @@ sudo apt-get install maas-dhcp maas-dns -y
 ```
 sudo maas createadmin --username=root --email=MYEMAIL@EXAMPLE.COM
 ```
-- Log in on the server
+- Log in on the server: http://localhost/MAAS
 - Import the boot images  
