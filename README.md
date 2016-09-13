@@ -17,5 +17,4 @@
 - [Vmware Workspaction Pro 12](https://my.vmware.com/web/vmware/info?slug=desktop_end_user_computing/vmware_workstation_pro/12_0#product_downloads)
 - [Ubuntu OS](http://www.ubuntu.com/download/server/install-ubuntu-server)
 - [Ubuntu MAAS](https://maas.ubuntu.com/docs/install.html)
-- 
 
