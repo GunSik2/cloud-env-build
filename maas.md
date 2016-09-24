@@ -1,4 +1,8 @@
-# MAAS
+# MAAS Installation
+
+### Linux Installation
+- Download ubuntu Server : http://www.ubuntu.com/download/server
+- Run VMWare & create a new ubuntu server using the downloaded image
 
 ### MAAS Package Repositories
 ```
