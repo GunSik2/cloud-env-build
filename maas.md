@@ -6,6 +6,7 @@
 
 ### MAAS Package Repositories
 ```
+sudo apt install software-properties-common -y
 sudo add-apt-repository ppa:maas/stable
 sudo apt-get update
 ```
