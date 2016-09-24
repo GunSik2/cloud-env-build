@@ -18,3 +18,8 @@
 - [Ubuntu OS](http://www.ubuntu.com/download/server/install-ubuntu-server)
 - [Ubuntu MAAS](https://maas.ubuntu.com/docs/install.html)
 - [Windows Bash](http://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/)
+
+##OpenStack Install
+- Create the first node and install MaaS
+- Create three ubuntu nodes for openstack in shared VMs 
+- Install openstack using MaaS
