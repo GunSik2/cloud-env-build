@@ -35,3 +35,4 @@ sudo maas createadmin --username=root --email=MYEMAIL@EXAMPLE.COM
 
 ### Reference
 - Get OpenStack Autopilot : http://www.ubuntu.com/download/cloud
+- VMWare network config: http://blog.daum.net/_blog/BlogTypeView.do?blogid=0gub1&articleno=14&_bloghome_menu=recenttext
