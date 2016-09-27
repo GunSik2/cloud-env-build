@@ -27,4 +27,27 @@
   - Deploy node : HDD 20G, Ram 2G, Cpu 1x2 (Virtualization support), NIC eth0 vmnet2, eth1 bridge
   - Controller node : 
 
-##  
+
+## Experiment
+- MAAS: nat mode for portability
+- Add port forwarding
+  - VMWare > Virtaul Network Editor 
+  - VMnet8 > NAT Settings > Add
+    - 12822 : 192.168.42.128:22
+    - 12880 : 192.168.42.128:80
+  - Apply  
+- Add required repository
+```
+mount /dev/cdrom /media/cdrom
+sudo apt-get install python-software-properties
+sudo add-apt-repository ppa:juju/stable
+sudo add-apt-repository ppa:maas/stable
+sudo add-apt-repository ppa:cloud-installer/stable
+sudo apt-get update
+```
+- Install MAAS
+```
+sudo apt-get install maas
+sudo maas-region-admin createadmin
+```
+- Login to the MAAS UI at http://<maas.ip>/MAAS/
