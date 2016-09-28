@@ -37,3 +37,4 @@ sudo maas createadmin --username=root --email=MYEMAIL@EXAMPLE.COM
 - Get OpenStack Autopilot : http://www.ubuntu.com/download/cloud
 - VMWare network config: http://blog.daum.net/_blog/BlogTypeView.do?blogid=0gub1&articleno=14&_bloghome_menu=recenttext
 - Ubunut vmware-tools : https://help.ubuntu.com/community/VMware/Tools
+- http://certification-static.canonical.com/docs/MAAS_Advanced_NUC_Installation_And_Configuration.pdf
