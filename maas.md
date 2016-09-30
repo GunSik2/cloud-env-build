@@ -1,7 +1,7 @@
 # MAAS Installation
 
 ### Linux Installation
-- Download ubuntu Server : http://www.ubuntu.com/download/server
+- Download ubuntu Server : http://releases.ubuntu.com/14.04/
 - Run VMWare & create a new ubuntu server using the downloaded image
   - config netwrork to use bridge mode
 
@@ -17,6 +17,7 @@ sudo apt-get update
 ```
 sudo apt-get install maas -y
 sudo apt-get install maas-dhcp maas-dns -y
+sudo apt-get install python-pyvmomi --install-suggests -y
 ```
 
 ### Post-Install tasks
@@ -39,3 +40,4 @@ sudo maas createadmin --username=root --email=MYEMAIL@EXAMPLE.COM
 - Ubunut vmware-tools : https://help.ubuntu.com/community/VMware/Tools
 - https://maas.ubuntu.com/docs2.0/install.html
 - http://certification-static.canonical.com/docs/MAAS_Advanced_NUC_Installation_And_Configuration.pdf
+- https://oxynets.wordpress.com/2015/09/21/ubuntu-server-how-to-manage-the-virtual-machines-created-via-vmware-workstation-on-maas-with-ubuntu-14-04-3lts-server-edition/
