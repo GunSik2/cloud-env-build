@@ -17,7 +17,16 @@ sudo apt-get update
 ```
 sudo apt-get install maas -y
 sudo apt-get install maas-dhcp maas-dns -y
-sudo apt-get install python-pyvmomi --install-suggests -y
+```
+### Installing Pyvmomi from source
+```
+sudo apt-get install git
+sudo apt install python3-pip
+git clone https://github.com/vmware/pyvmomi; cd pyvmomi
+sudo python3 setup.py install
+
+# sudo apt-get install python-pip -y
+# sudo pip3 install --upgrade pyvmomi -y
 ```
 
 ### Post-Install tasks
@@ -28,6 +37,17 @@ sudo maas createadmin --username=root --email=MYEMAIL@EXAMPLE.COM
 - Log in on the server: http://localhost/MAAS
 - Import the boot images  
 
+- Create chesis
+```
+maas login maas http://http://192.168.10.18/MAAS Mhmm68ZJfQsZvGKzcQ:wHF5Bp5vSMDmvU5dWp:hWcn7UbkbMbdw4CYe4r5fNQMkZkUbF4S
+maas maas machines add-chassis chassis_type=vmware username=gun  password=choiGun7 protocol='https' hostname=192.168.10.11
+```
+
+### Trouble shooting
+- cdrom error during apt-get update
+```
+sudo vi /etc/apt/sources.list
+```
 
 ### VMWare Workstation/Fustion 
 - [How to configure MAAS to be able to boot virtual machines via VMWare type](http://askubuntu.com/questions/663771/how-to-configure-maas-to-be-able-to-boot-virtual-machines-via-vmware-type)
