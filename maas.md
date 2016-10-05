@@ -36,7 +36,20 @@ sudo maas createadmin --username=root --email=MYEMAIL@EXAMPLE.COM
 ```
 - Log in on the server: http://localhost/MAAS
 - Import the boot images  
+- Create ssh
+```
+sudo mkdir /home/maas
+sudo chown maas:maas /home/maas
 
+sudo chsh -s /bin/bash maas
+sudo su - maas
+ssh-keygen -f ~/.ssh/id_rsa -N ''
+copy public key and paste it MAAS > Settings > Add SSH key
+```
+
+### Create node
+
+### Import node
 - Create chesis
 ```
 maas login maas http://http://192.168.10.18/MAAS Mhmm68ZJfQsZvGKzcQ:wHF5Bp5vSMDmvU5dWp:hWcn7UbkbMbdw4CYe4r5fNQMkZkUbF4S
