@@ -53,7 +53,7 @@ copy public key and paste it MAAS > Settings > Add SSH key
 - Create chesis
 ```
 maas login maas http://http://192.168.10.18/MAAS Mhmm68ZJfQsZvGKzcQ:wHF5Bp5vSMDmvU5dWp:hWcn7UbkbMbdw4CYe4r5fNQMkZkUbF4S
-maas maas machines add-chassis chassis_type=vmware username=gun  password=choiGun7 protocol='https' hostname=192.168.10.11
+maas maas machines add-chassis chassis_type=vmware username=username  password=password protocol='https' hostname=192.168.10.11
 ```
 
 ### Trouble shooting
