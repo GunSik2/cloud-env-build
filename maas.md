@@ -61,7 +61,54 @@ maas maas machines add-chassis chassis_type=vmware username=gun  password=choiGu
 ```
 sudo vi /etc/apt/sources.list
 ```
+- connection error from vm to host
+  - config: Bridge & Host only (ens33, ens38)
+  - added NAT to solve the problem (ens39)
+```
+route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         192.168.10.1    0.0.0.0         UG    0      0        0 ens33
+10.10.10.0      *               255.255.255.0   U     0      0        0 ens38
+192.168.10.0    *               255.255.255.0   U     0      0        0 ens33
+192.168.253.0   *               255.255.255.0   U     0      0        0 ens39
+```
+  - use NAT gw as default gw
+```
+sudo route add default gw 192.168.253.2 
+route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         192.168.253.2   0.0.0.0         UG    0      0        0 ens39
+default         192.168.10.1    0.0.0.0         UG    0      0        0 ens33
+10.10.10.0      *               255.255.255.0   U     0      0        0 ens38
+192.168.10.0    *               255.255.255.0   U     0      0        0 ens33
+192.168.253.0   *               255.255.255.0   U     0      0        0 ens39
 
+sudo route del default gw 192.168.10.1
+route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         192.168.253.2   0.0.0.0         UG    0      0        0 ens39
+10.10.10.0      *               255.255.255.0   U     0      0        0 ens38
+192.168.10.0    *               255.255.255.0   U     0      0        0 ens33
+192.168.253.0   *               255.255.255.0   U     0      0        0 ens39
+
+```
+  - use NAT gw as host net
+```
+sudo route add -net 192.168.10.0 netmask 255.255.255.0 gw 192.168.253.2 dev ens39
+route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         192.168.253.2   0.0.0.0         UG    0      0        0 ens39
+10.10.10.0      *               255.255.255.0   U     0      0        0 ens38
+192.168.10.0    192.168.253.2   255.255.255.0   UG    0      0        0 ens39
+192.168.10.0    *               255.255.255.0   U     0      0        0 ens33
+192.168.253.0   *               255.255.255.0   U     0      0        0 ens39
+```
+  - 호스트에서 Guest 접속을 위해 bridge ip 대신 nat ip를 사용하여 접속
+  
 ### VMWare Workstation/Fustion 
 - [How to configure MAAS to be able to boot virtual machines via VMWare type](http://askubuntu.com/questions/663771/how-to-configure-maas-to-be-able-to-boot-virtual-machines-via-vmware-type)
 - [Creating a Shared Virtual Machine in Fusion](https://pubs.vmware.com/fusion-8/index.jsp?topic=%2Fcom.vmware.fusion.using.doc%2FGUID-30FCA4B3-D9FD-40AF-8817-F0902AE6D758.html)
