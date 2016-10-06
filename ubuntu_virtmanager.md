@@ -81,3 +81,4 @@ sudo apt install nethogs
 
 #### Reference
 - 동영상: https://www.youtube.com/watch?v=ojTTgrtl-RU
+- [Introduction: Deploying OpenStack on MAAS 1.9+ with Juju](http://blog.naydenov.net/2015/11/deploying-openstack-on-maas-1-9-with-juju-network-setup/)
