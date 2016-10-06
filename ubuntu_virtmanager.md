@@ -37,6 +37,47 @@ wget http://releases.ubuntu.com/14.04/ubuntu-14.04.5-server-amd64.iso
 ```
 virt-manager -c qemu:///system
 ```
+- Create Network 
+  - Edit > Create Network > Virtual Networks tab  
+  - Network : maas - NAT
+- Create VM for MaaS Controller
+  - File > New VirtualMachine
+  - VM : maas, using maas network
 
 ### MaaS 설치
-- 참고 동영상: https://www.youtube.com/watch?v=ojTTgrtl-RU
+- Install MaaS on MaaS Controller
+```
+sudo apt install software-properties-common -y
+sudo add-apt-repository ppa:maas/stable
+sudo apt-get update
+
+sudo apt-get install maas -y
+sudo apt-get install maas-dhcp maas-dns -y
+
+sudo maas-region-admin createadmin
+```
+- Log in on the server: http://localhost/MAAS
+- Import the boot images
+- Create ssh
+```
+sudo mkdir /home/maas
+sudo chown maas:maas /home/maas
+
+sudo chsh -s /bin/bash maas
+sudo su - maas
+ssh-keygen -f ~/.ssh/id_rsa -N ''
+```
+  - copy public key and paste it on "MAAS > Settings > Add SSH key"
+  
+  
+
+### Utility 
+```
+sudo apt install byobu
+sudo apt install iptraf
+sudo apt install nethogs
+
+```
+
+#### Reference
+- 동영상: https://www.youtube.com/watch?v=ojTTgrtl-RU
