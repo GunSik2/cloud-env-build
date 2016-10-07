@@ -50,6 +50,7 @@ copy public key and paste it MAAS > Settings > Add SSH key
 ### Create node
 - Node network interface setting is very import.
 - Two networks are required: Host only & NAT (Bridge doesn't work)
+- NAT is mandatory because public network access is required during commission step.
 
 ### Import node
 - Create chesis
