@@ -57,6 +57,10 @@ maas maas machines add-chassis chassis_type=vmware username=username  password=p
 ```
 
 ### Trouble shooting
+- rack controller 오류 발생 시 재 등록
+```
+sudo dpkg-reconfigure maas-rack-controller
+```
 - cdrom error during apt-get update
 ```
 sudo vi /etc/apt/sources.list
