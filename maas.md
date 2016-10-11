@@ -2,14 +2,17 @@
 
 ### Linux Installation
 - Download ubuntu Server : http://releases.ubuntu.com/14.04/
+  (Ubuntu 14.04 (Trusty Tahr)
 - Run VMWare & create a new ubuntu server using the downloaded image
-  - config netwrork to use bridge mode
+  - config network to use Host-only & NAT 
 
 ### MAAS Package Repositories
+- Verify that you’ve installed MAAS 1.9 
 ```
 sudo apt install software-properties-common -y
 sudo add-apt-repository ppa:maas/stable
 sudo apt-get update
+sudo dpkg -s maas | grep Version
 ```
 
 ### Installing MAAS from the command line 
@@ -135,3 +138,4 @@ sudo route add -net 192.168.88.0/24 gateway 192.168.42.2 dev ens33  # Bridge -> 
 - https://maas.ubuntu.com/docs2.0/install.html
 - http://certification-static.canonical.com/docs/MAAS_Advanced_NUC_Installation_And_Configuration.pdf
 - https://oxynets.wordpress.com/2015/09/21/ubuntu-server-how-to-manage-the-virtual-machines-created-via-vmware-workstation-on-maas-with-ubuntu-14-04-3lts-server-edition/
+- http://certification-static.canonical.com/docs/coverage_by_release/all/MAAS_Advanced_NUC_Installation_And_Configuration-18Mar16.pdf
