@@ -13,6 +13,7 @@ sudo apt install software-properties-common -y
 sudo add-apt-repository ppa:maas/stable
 sudo apt-get update
 sudo dpkg -s maas | grep Version
+Version: 2.0.0+bzr5189-0ubuntu1~16.04.1
 ```
 
 ### Installing MAAS from the command line 
@@ -58,8 +59,9 @@ copy public key and paste it MAAS > Settings > Add SSH key
 ### Import node
 - Create chesis
 ```
-maas login maas http://http://192.168.10.18/MAAS Mhmm68ZJfQsZvGKzcQ:wHF5Bp5vSMDmvU5dWp:hWcn7UbkbMbdw4CYe4r5fNQMkZkUbF4S
-maas maas machines add-chassis chassis_type=vmware username=username  password=password protocol='https+unverified' hostname=192.168.10.11
+sudo apt install maas-cli
+maas login maas http://10.10.10.10/MAAS eXVMj65nJjXcQcFJyU:CqLbmMnXhkRD2PzXPr:BpBvSqYANXNwJXyHwppd3sZ9WsydXyje
+maas maas machines add-chassis chassis_type=vmware username=username  password=password protocol='https+unverified' hostname=192.168.88.27
 ```
 
 ### Trouble shooting
