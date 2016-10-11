@@ -26,15 +26,14 @@ newgrp lxd
 sudo lxd init
 : Size in GB of the new loop device (1GB minimum) [default=10GB]: 20
 : Do you want to configure the LXD bridge (yes/no) [default=yes]? yes
-: interface name: lxdbr0
+: interface name: default (lxdbr0)
 : IPv4 subnet: yes
-: IPv4 setting: 10.255.0.1, 24, 10.255.0.2 (DHCP), 10.255.0.254 (Last DHCP), 250 (Max number)
+: IPv4 setting: default (eg.10.255.0.1, 24, 10.255.0.2 (DHCP), 10.255.0.254 (Last DHCP), 250 (Max number))
 : NAT the IPv4: yes
 : Ipv6 subnet: no
-
 ```
 
-- Create a controller 
+- Create a local controller 
 ```
 juju status
 juju bootstrap lxd-test localhost
@@ -44,11 +43,11 @@ juju whoami
 
 - Deploy a charm
 ```
-juju deploy mysql
+juju deploy wiki-simple
 juju status
 ```
 
-## Juju MaaS cloud environment
+## Run Juju in MaaS cloud environment
 - Create a yaml
 ```
 vi ~/.juju/maas-clouds.yaml
@@ -65,7 +64,13 @@ juju list-clouds
 juju add-credential devmaas
 > maas-oauth: <MaaS API Key>
 
-juju bootstrap devmaas-controller devdmaas
+juju bootstrap devmaas-controller devmaas
+juju list-controllers 
+```
+- Deploy a charm
+```
+juju deploy wiki-simple
+juju status
 ```
 
 
