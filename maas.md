@@ -64,6 +64,17 @@ maas login maas http://10.10.10.10/MAAS eXVMj65nJjXcQcFJyU:CqLbmMnXhkRD2PzXPr:Bp
 maas maas machines add-chassis chassis_type=vmware username=username  password=password protocol='https+unverified' hostname=192.168.88.27
 ```
 
+### MaaS cli
+```
+maas maas nodes list
+maas maas nodes accept-all
+
+maas maas node release <system-id>
+maas maas node delete <system-id>
+
+```
+
+
 ### Trouble shooting
 - rack controller 오류 발생 시 재 등록
 ```
