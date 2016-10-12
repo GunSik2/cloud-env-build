@@ -1,13 +1,21 @@
 # MAAS Installation
 
 ### Linux Installation
-- Download ubuntu Server : http://releases.ubuntu.com/14.04/
-  (Ubuntu 14.04 (Trusty Tahr)
+- Download ubuntu Server : http://releases.ubuntu.com/16.04/
 - Run VMWare & create a new ubuntu server using the downloaded image
-  - config network to use Host-only & NAT 
+  - config network to use Host-only, NAT
+```
+auto ens32  # Host-only
+iface ens32 inet static
+        address 10.10.20.11
+
+auto ens33   # NAT
+iface ens33 inet dhcp
+        up route add -net 192.168.10.0 netmask 255.255.255.0 gw 192.168.20.2
+```
 
 ### MAAS Package Repositories
-- Verify that you’ve installed MAAS 1.9 
+- Verify that you’ve installed MAAS 2.0 
 ```
 sudo apt install software-properties-common -y
 sudo add-apt-repository ppa:maas/stable
