@@ -5,9 +5,15 @@
 - Run VMWare & create a new ubuntu server using the downloaded image
   - config network to use Host-only, NAT
 ```
+
 auto ens32  # Host-only
 iface ens32 inet static
         address 10.10.20.11
+        netmask 255.255.255.0
+        network 10.10.20.0
+        broadcast 10.10.20.255
+        dns-nameserver 10.10.20.11
+        dns-search maas
 
 auto ens33   # NAT
 iface ens33 inet dhcp
