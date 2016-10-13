@@ -3,9 +3,8 @@
 ## Deploying OpenStack with Juju
 - Initialising Juju
 ```
-juju sync-tools --debug
-juju bootstrap --upload-tools --debug   # create bootstrap instance
-juju status
+juju deploy --to=bootstrap01 juju-gui
+
 ```
 
 
