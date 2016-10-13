@@ -5,8 +5,7 @@
 
 ## Env
 - Juju 1.25 (Stable version is is 1.25.6)
-- 16.04 LTS (Xenial)
-
+- 14.04 LTS 
 
 ## MaaS UI config. for Juju
 - Generate MaaS key 
