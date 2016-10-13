@@ -25,7 +25,7 @@
   - Create four ubuntu nodes for openstack in shared VMs 
 - On MaaS
   - Commisioning four ubuntu nodes
-  - Modify the interfaces and storage on each node (Set interface ip and mount disks)
+  - Edit the interfaces, tags and storage on each node (Set interface ip and mount disks)
   - Install Juju and bootstrap to create juju controller on the second node 
 - On Juju
   - Add the other nodes as machines in juju 
