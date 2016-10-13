@@ -36,7 +36,7 @@ sudo lxd init
 - Create a local controller 
 ```
 juju status
-juju bootstrap lxd-test localhost
+juju bootstrap maas-localhost localhost
 juju list-controllers 
 juju whoami
 ```
@@ -72,11 +72,21 @@ juju add-credential maas
 > Enter credential name: maas
 > maas-oauth: <MaaS API Key>
 
-juju bootstrap maas maas
+juju bootstrap maas maas --to bootstrap01.maas  --debug
 juju list-controllers 
+```
+- Add MaaS machine
+```
+juju add-machine controller01.maas
+juju add-machine neutron01.maas
+juju add-machine compute01.maas
+juju add-machine compute02.maas
 ```
 - Deploy a charm
 ```
+juju deploy juju-gui --to bootstrap01.maas:lxc:0
+juju get juju-gui
+
 juju deploy wiki-simple
 juju status
 ```
