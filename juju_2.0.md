@@ -48,23 +48,31 @@ juju status
 ```
 
 ## Run Juju in MaaS cloud environment
+- Install
+```
+sudo apt-add-repository -y ppa:juju/devel
+sudo apt update
+sudo apt install juju 
+newgrp lxd
+```
 - Create a yaml
 ```
 vi ~/.juju/maas-clouds.yaml
 clouds:
-   devmaas:
+   maas:
       type: maas
       auth-types: [oauth1]
-      endpoint: http://172.18.42.10/MAAS
+      endpoint: http://10.10.20.11/MAAS
 ```
 - Create juju cloud controller
 ```
-juju add-cloud devmaas ~/.juju/maas-clouds.yaml
+juju add-cloud maas ~/.juju/maas-clouds.yaml
 juju list-clouds
-juju add-credential devmaas
+juju add-credential maas
+> Enter credential name: maas
 > maas-oauth: <MaaS API Key>
 
-juju bootstrap devmaas-controller devmaas
+juju bootstrap maas maas
 juju list-controllers 
 ```
 - Deploy a charm
