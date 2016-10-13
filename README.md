@@ -26,7 +26,7 @@
 - On MaaS
   - Commisioning four ubuntu nodes
   - Edit the interfaces, tags and storage on each node (Set interface ip and mount disks)
-  - Install Juju and bootstrap to create juju controller on the second node 
+  - Install Juju and bootstrap to create juju controller on another node 
 - On Juju
-  - Add the other nodes as machines in juju 
+  - Add the other nodes to machines in juju 
   - Install openstack modules on the machines
