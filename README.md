@@ -20,6 +20,12 @@
 - [Windows Bash](http://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/)
 
 ##OpenStack Installation
-- Create the first node and install MaaS
-- Create three ubuntu nodes for openstack in shared VMs 
-- Install openstack using MaaS
+- On VMWare 
+  - Create the first node and install MaaS
+  - Create four ubuntu nodes for openstack in shared VMs 
+- On MaaS
+  - Commisioning four ubuntu nodes
+  - Install Juju and bootstrap to create juju controller on the second node 
+- On Juju
+  - Add the other nodes as machines in juju 
+  - Install openstack modules on the machines
