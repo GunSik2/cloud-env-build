@@ -94,7 +94,7 @@ nameserver 192.168.20.2  # NAT DNS
 ```
 - Access to the nodes
 ```
-ssh -i 
+ssh -i bootstrap01.maas
 ```
 
 ### MaaS cli
