@@ -104,8 +104,13 @@ juju deploy wiki-simple
 juju status
 ```
 
+## LXC commands
+```
+lxc launch ubuntu:
 
+```
 ## Reference
 - [Getting Started with Juju 2.0](https://jujucharms.com/docs/stable/getting-started)
 - [Using a MAAS cloud](https://jujucharms.com/docs/2.0/clouds-maas)
 - [Juju Quick Start](https://maas.ubuntu.com/docs/juju-quick-start.html)
+- [LXC commands](https://insights.ubuntu.com/2016/03/22/lxd-2-0-your-first-lxd-container/)
