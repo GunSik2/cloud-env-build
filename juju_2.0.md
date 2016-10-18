@@ -16,12 +16,12 @@
   - MaaS UI > Account > Add SSH Key 
   - copy ~/.ssh/id_rsa.pub
 
-## Run Juju in local environment
+## Run Juju in LXD local environment
 - Install
 ```
 sudo apt-add-repository -y ppa:juju/devel
 sudo apt update
-sudo apt install juju zfsutils-linux
+sudo apt install juju lxd zfsutils-linux
 newgrp lxd
 sudo lxd init
 : Size in GB of the new loop device (1GB minimum) [default=10GB]: 20
@@ -33,10 +33,14 @@ sudo lxd init
 : Ipv6 subnet: no
 ```
 
-- Create a local controller 
+- Create juju lxd controller 
 ```
 juju status
-juju bootstrap maas-localhost localhost
+juju bootstrap maas localhost
+juju status
+juju gui
+juju show-controller --show-password
+
 juju list-controllers 
 juju whoami
 ```
@@ -45,6 +49,12 @@ juju whoami
 ```
 juju deploy wiki-simple
 juju status
+```
+
+- 
+- Delete a local controller
+```
+- juju destroy-controller maas-localhost --destroy-all-models
 ```
 
 ## Run Juju in MaaS cloud environment
@@ -75,6 +85,9 @@ juju add-credential maas
 juju bootstrap maas maas --to bootstrap01.maas  --debug
 juju list-controllers 
 ```
+
+## Add MaaS Machines & Deploy jujucharms
+
 - Add MaaS machine
 ```
 juju add-machine controller01.maas
