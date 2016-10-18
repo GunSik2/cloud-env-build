@@ -36,7 +36,7 @@ sudo lxd init
 - Create juju lxd controller 
 ```
 juju status
-juju bootstrap maas localhost
+juju bootstrap localhost localhost
 juju status
 juju gui
 juju show-controller --show-password
