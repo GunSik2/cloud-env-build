@@ -53,8 +53,7 @@ sudo maas-rack register
 ```
 sudo maas createadmin 
 ```
-- Log in on the server: http://localhost/MAAS
-- 
+- Log in on the server: http://localhost/MAAS 
 - Import the boot images : Images > Apply changes
 - Create DHCP : Networks > Click VLAN for "10.10.20.0/24" > Provide DHCP > Remove Gateway IP > Provide DHCP  
 - Create maas user's ssh key 
