@@ -85,6 +85,7 @@ juju add-credential maas
 juju bootstrap maas maas --to bootstrap01.maas  --debug
 juju list-controllers 
 juju gui
+juju show-controller --show-password
 ```
 
 ## Add MaaS Machines & Deploy jujucharms
