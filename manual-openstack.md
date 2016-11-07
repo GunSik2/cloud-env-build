@@ -290,7 +290,7 @@ $ openstack endpoint create --region RegionOne image admin http://controller:929
 ```
 - Install and configure components
 ```
-# apt-get install glance
+# apt-get install glance -y
 
 # echo $GLANCE_DBPASS $GLANCE_PASS
 # vi /etc/glance/glance-api.conf
