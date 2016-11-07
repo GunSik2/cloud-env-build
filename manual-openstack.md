@@ -111,7 +111,7 @@ character-set-server = utf8
 # service memcached restart
 ```
 
-## 3. Identity Service on Controller
+## 3. Identity Service on Controller node
 ### Overview
 The Identity service contains these components:
 - Server : A centralized server provides authentication and authorization services using a RESTful interface
@@ -209,13 +209,13 @@ $ openstack endpoint create --region RegionOne identity admin http://controller:
 $ openstack domain create --description "Default Domain" default
 
 $ openstack project create --domain default --description "Admin Project" admin
-$ openstack user create --domain default --password-prompt admin
+$ openstack user create --domain default  --password $ADMIN_PASS admin
 $ openstack role create admin
 $ openstack role add --project admin --user admin admin
 
 $ openstack project create --domain default --description "Service Project" service
 $ openstack project create --domain default --description "Demo Project" demo
-$ openstack user create --domain default --password-prompt demo
+$ openstack user create --domain default --password $DEMO_PASS demo
 $ openstack role create user
 $ openstack role add --project demo --user demo user
 ```
@@ -231,15 +231,15 @@ $ openstack --os-auth-url http://controller:5000/v3 \
 ```
 ### Create OpenStack client environment scripts
 - Creating the scripts 
-  - Both passwords, ADMIN_PASSWORD & DEMO_PASSWORD, are the values typed in the step "Create a domain, projects, users, and roles"
 ```
 $ echo $ADMIN_PASS $DEMO_PASS
+
 $ vi admin-openrc
 export OS_PROJECT_DOMAIN_NAME=default
 export OS_USER_DOMAIN_NAME=default
 export OS_PROJECT_NAME=admin
 export OS_USERNAME=admin
-export OS_PASSWORD=ADMIN_PASSWORD
+export OS_PASSWORD=ADMIN_PASS
 export OS_AUTH_URL=http://controller:35357/v3
 export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
@@ -249,7 +249,7 @@ export OS_PROJECT_DOMAIN_NAME=default
 export OS_USER_DOMAIN_NAME=default
 export OS_PROJECT_NAME=demo
 export OS_USERNAME=demo
-export OS_PASSWORD=DEMO_PASSWORD
+export OS_PASSWORD=DEMO_PASS
 export OS_AUTH_URL=http://controller:5000/v3
 export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
@@ -259,3 +259,85 @@ Using the scripts
 $ . admin-openrc
 $ openstack token issue
 ```
+
+## 4. Image Service on Controller node
+### Overview
+- The Image service includes the following components:
+  - glance-api : Accepts Image API calls for image discovery, retrieval, and storage.
+  - glance-registry : Stores, processes, and retrieves metadata about images. (A private internal service)
+  - Database : Stores image metadata
+  - Storage repository for image files : Supported including normal file systems, Object Storage, RADOS block devices, HTTP, and Amazon S3
+  - Metadata definition service : A common API to define custom metadata
+
+### Install and configure
+- Prerequisites : GLANCE_DBPASS
+```
+$ echo $GLANCE_DBPASS
+
+$ mysql -u root -p
+CREATE DATABASE glance;
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' IDENTIFIED BY 'GLANCE_DBPASS';
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY 'GLANCE_DBPASS';
+  
+  
+$ . admin-openrc  
+$ openstack user create --domain default --password $GLANCE_PASS glance
+$ openstack role add --project service --user glance admin
+$ openstack service create --name glance --description "OpenStack Image" image
+$ openstack endpoint create --region RegionOne image public http://controller:9292
+$ openstack endpoint create --region RegionOne image internal http://controller:9292
+$ openstack endpoint create --region RegionOne image admin http://controller:9292
+```
+- Install and configure components
+```
+# apt-get install glance
+
+# echo $GLANCE_DBPASS $GLANCE_PASS
+# vi /etc/glance/glance-api.conf
+[database]
+connection = mysql+pymysql://glance:GLANCE_DBPASS@controller/glance
+[keystone_authtoken]
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+memcached_servers = controller:11211
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = glance
+password = GLANCE_PASS
+[paste_deploy]
+flavor = keystone
+[keystone_authtoken]
+# Comment out or remove any other options in the [keystone_authtoken] section
+[glance_store]
+stores = file,http
+default_store = file
+filesystem_store_datadir = /var/lib/glance/images/
+
+# echo $GLANCE_DBPASS $GLANCE_PASS
+# vi /etc/glance/glance-registry.conf
+[database]
+connection = mysql+pymysql://glance:GLANCE_DBPASS@controller/glance
+[keystone_authtoken]
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+memcached_servers = controller:11211
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = glance
+password = GLANCE_PASS
+[paste_deploy]
+flavor = keystone
+
+# su -s /bin/sh -c "glance-manage db_sync" glance
+```
+- Finalize installation
+```
+# service glance-registry restart
+# service glance-api restart
+```
+### Verify operation
+
