@@ -179,3 +179,290 @@ $ openstack compute service list
 +----+------------------+------------+----------+---------+-------+----------------------------+
 ```
 
+## 6. Networking service
+
+### Overview
+- Components
+  - neutron-server : Accepts and routes API requests to the appropriate OpenStack Networking plug-in for action
+  - plug-ins and agents : Plugs and unplugs ports, creates networks or subnets, and provides IP addressing.
+  - Messing queue 
+
+### Install and configure controller node
+- Prerequisites : NEUTRON_DBPASS, NEUTRON_PASS
+```
+$ echo $NEUTRON_DBPASS, $NEUTRON_PASS
+$ mysql -u root -p
+CREATE DATABASE neutron;
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'localhost' IDENTIFIED BY 'NEUTRON_DBPASS';
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY 'NEUTRON_DBPASS';
+
+$ . admin-openrc
+$ openstack user create --domain default --password $NEUTRON_PASS neutron
+$ openstack role add --project service --user neutron admin
+$ openstack service create --name neutron --description "OpenStack Networking" network
+$ openstack endpoint create --region RegionOne network public http://controller:9696
+$ openstack endpoint create --region RegionOne network internal http://controller:9696  
+$ openstack endpoint create --region RegionOne network admin http://controller:9696  
+```
+- Configure networking options
+  - Apply Networking Option 2: Self-service networks
+  - Install the components
+```
+# apt-get install neutron-server neutron-plugin-ml2 \
+  neutron-linuxbridge-agent neutron-l3-agent neutron-dhcp-agent \
+  neutron-metadata-agent -y
+```
+  - Configure the server component: NEUTRON_DBPASS, RABBIT_PASS, NEUTRON_PASS, NOVA_PASS
+```
+# echo $NEUTRON_DBPASS, $RABBIT_PASS, $NEUTRON_PASS, $NOVA_PASS
+# vi /etc/neutron/neutron.conf
+[DEFAULT]
+core_plugin = ml2
+service_plugins = router
+allow_overlapping_ips = True
+rpc_backend = rabbit
+auth_strategy = keystone
+notify_nova_on_port_status_changes = True
+notify_nova_on_port_data_changes = True
+
+[database]
+connection = mysql+pymysql://neutron:NEUTRON_DBPASS@controller/neutron
+
+[oslo_messaging_rabbit]
+rabbit_host = controller
+rabbit_userid = openstack
+rabbit_password = RABBIT_PASS
+
+[keystone_authtoken]
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+memcached_servers = controller:11211
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = neutron
+password = NEUTRON_PASS
+
+[nova]
+auth_url = http://controller:35357
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+region_name = RegionOne
+project_name = service
+username = nova
+password = NOVA_PASS
+```
+  - Configure the Modular Layer 2 (ML2) plug-in
+```
+# vi /etc/neutron/plugins/ml2/ml2_conf.ini
+[ml2]
+type_drivers = flat,vlan,vxlan
+tenant_network_types = vxlan
+mechanism_drivers = linuxbridge,l2population
+extension_drivers = port_security
+
+[ml2_type_flat]
+flat_networks = provider
+vni_ranges = 1:1000
+
+[securitygroup]
+enable_ipset = True
+```
+  - Configure the Linux bridge agent: PROVIDER_INTERFACE_NAME(public interface), OVERLAY_INTERFACE_IP_ADDRESS(management IP address)
+```
+# vi /etc/neutron/plugins/ml2/linuxbridge_agent.ini
+[linux_bridge]
+physical_interface_mappings = provider:PROVIDER_INTERFACE_NAME
+
+[vxlan]
+enable_vxlan = True
+local_ip = OVERLAY_INTERFACE_IP_ADDRESS
+l2_population = True
+
+[securitygroup]
+enable_security_group = True
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+```
+  - Configure the layer-3 agent
+```
+# vi /etc/neutron/l3_agent.ini
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+external_network_bridge =
+```
+  - Configure the DHCP agent
+```
+# vi /etc/neutron/dhcp_agent.ini
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
+dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+enable_isolated_metadata = True
+```
+
+
+- Configure the metadata agent : METADATA_SECRET
+```
+# echo $METADATA_SECRET
+
+# vi /etc/neutron/metadata_agent.ini
+[DEFAULT]
+nova_metadata_ip = controller
+metadata_proxy_shared_secret = METADATA_SECRET
+```
+- Configure Compute to use Networking : NEUTRON_PASS, METADATA_SECRET
+```
+# echo $NEUTRON_PASS, $METADATA_SECRET
+
+# vi /etc/nova/nova.conf
+[neutron]
+url = http://controller:9696
+auth_url = http://controller:35357
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+region_name = RegionOne
+project_name = service
+username = neutron
+password = NEUTRON_PASS
+
+service_metadata_proxy = True
+metadata_proxy_shared_secret = METADATA_SECRET
+```
+- Finalize installation
+```
+# su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf \
+  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
+# service nova-api restart  
+# service neutron-server restart
+# service neutron-linuxbridge-agent restart
+# service neutron-dhcp-agent restart
+# service neutron-metadata-agent restart
+```
+
+### Install and configure compute node
+- Install the components
+```
+# apt-get install neutron-linuxbridge-agent -y
+```
+- Configure the common component : RABBIT_PASS, NEUTRON_PASS
+```
+# echo $RABBIT_PASS, $NEUTRON_PASS
+# vi /etc/neutron/neutron.conf
+
+[DEFAULT]
+rpc_backend = rabbit
+auth_strategy = keystone
+
+[oslo_messaging_rabbit]
+rabbit_host = controller
+rabbit_userid = openstack
+rabbit_password = RABBIT_PASS
+
+[keystone_authtoken]
+auth_uri = http://controller:5000
+auth_url = http://controller:35357
+memcached_servers = controller:11211
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = neutron
+password = NEUTRON_PASS
+```
+- Configure networking options 
+  - Apply Networking Option 2: Self-service networks
+  - Configure the Linux bridge agent : PROVIDER_INTERFACE_NAME (eth1), OVERLAY_INTERFACE_IP_ADDRESS (10.0.0.31)
+```
+# vi /etc/neutron/plugins/ml2/linuxbridge_agent.ini
+[linux_bridge]
+physical_interface_mappings = provider:PROVIDER_INTERFACE_NAME
+
+[vxlan]
+enable_vxlan = True
+local_ip = OVERLAY_INTERFACE_IP_ADDRESS
+l2_population = True
+
+[securitygroup]
+enable_security_group = True
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+```
+- Configure Compute to use Networking : NEUTRON_PASS
+```
+# echo $NEUTRON_PASS
+
+# vi /etc/nova/nova.conf
+[neutron]
+url = http://controller:9696
+auth_url = http://controller:35357
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+region_name = RegionOne
+project_name = service
+username = neutron
+password = NEUTRON_PASS
+
+```
+- Finalize installation
+```
+# service nova-compute restart
+# service neutron-linuxbridge-agent restart
+```
+
+### Verify operation on Controller 
+```
+$ . admin-openrc
+$ neutron ext-list
++---------------------------+-----------------------------------------------+
+| alias                     | name                                          |
++---------------------------+-----------------------------------------------+
+| default-subnetpools       | Default Subnetpools                           |
+| network-ip-availability   | Network IP Availability                       |
+| network_availability_zone | Network Availability Zone                     |
+| auto-allocated-topology   | Auto Allocated Topology Services              |
+| ext-gw-mode               | Neutron L3 Configurable external gateway mode |
+| binding                   | Port Binding                                  |
+| agent                     | agent                                         |
+| subnet_allocation         | Subnet Allocation                             |
+| l3_agent_scheduler        | L3 Agent Scheduler                            |
+| tag                       | Tag support                                   |
+| external-net              | Neutron external network                      |
+| net-mtu                   | Network MTU                                   |
+| availability_zone         | Availability Zone                             |
+| quotas                    | Quota management support                      |
+| l3-ha                     | HA Router extension                           |
+| provider                  | Provider Network                              |
+| multi-provider            | Multi Provider Network                        |
+| address-scope             | Address scope                                 |
+| extraroute                | Neutron Extra Route                           |
+| timestamp_core            | Time Stamp Fields addition for core resources |
+| router                    | Neutron L3 Router                             |
+| extra_dhcp_opt            | Neutron Extra DHCP opts                       |
+| dns-integration           | DNS Integration                               |
+| security-group            | security-group                                |
+| dhcp_agent_scheduler      | DHCP Agent Scheduler                          |
+| router_availability_zone  | Router Availability Zone                      |
+| rbac-policies             | RBAC Policies                                 |
+| standard-attr-description | standard-attr-description                     |
+| port-security             | Port Security                                 |
+| allowed-address-pairs     | Allowed Address Pairs                         |
+| dvr                       | Distributed Virtual Router                    |
++---------------------------+-----------------------------------------------+
+
+$ neutron agent-list
++--------------------------------------+--------------------+------------+-------------------+-------+----------------+---------------------------+
+| id                                   | agent_type         | host       | availability_zone | alive | admin_state_up | binary                    |
++--------------------------------------+--------------------+------------+-------------------+-------+----------------+---------------------------+
+| 392ccb72-9b24-4bab-b4f5-92ee84914705 | Metadata agent     | controller |                   | :-)   | True           | neutron-metadata-agent    |
+| 6c075cba-865d-4826-a935-294c0283587c | DHCP agent         | controller | nova              | :-)   | True           | neutron-dhcp-agent        |
+| 7025f635-e75d-45a1-b600-b05dab356216 | Linux bridge agent | compute1   |                   | :-)   | True           | neutron-linuxbridge-agent |
+| a3853133-3b07-4257-80e7-5485278bf2af | L3 agent           | controller | nova              | :-)   | True           | neutron-l3-agent          |
+| e05cad72-2b37-44dc-a683-5213ded611d4 | Linux bridge agent | controller |                   | :-)   | True           | neutron-linuxbridge-agent |
++--------------------------------------+--------------------+------------+-------------------+-------+----------------+---------------------------+
+```
+
+### Launch an instance
+
+
