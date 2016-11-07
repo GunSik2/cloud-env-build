@@ -35,7 +35,8 @@ NOVA_DBPASS=$(openssl rand -hex 10)
 NOVA_PASS=$(openssl rand -hex 10)
 RABBIT_PASS=$(openssl rand -hex 10)
 SWIFT_PASS=$(openssl rand -hex 10)
-ADMIN_TOKEN=$(opensll rand -hex 10)" > password.sh
+ADMIN_TOKEN=$(opensll rand -hex 10)
+METADATA_SECRET=$(opensll rand -hex 10)" > password.sh
 
 . password.sh
 ```
