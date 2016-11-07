@@ -518,13 +518,105 @@ $ neutron router-gateway-set router provider
 ```
 $ . admin-openrc
 $ ip netns
+qrouter-0aab00b2-b215-4cf3-ba60-01e7dffc6aa8
+qdhcp-e5ad9c4a-fedd-4e6b-a8c0-d8d9d200e22d
+qdhcp-6d961263-dcdf-4a84-97a9-5a6f27cdbe2d
+
 $ neutron router-port-list router
++--------------------------------------+------+-------------------+---------------------------------------------------------------------------------------+
+| id                                   | name | mac_address       | fixed_ips                                                                             |
++--------------------------------------+------+-------------------+---------------------------------------------------------------------------------------+
+| 6aea6353-0714-4049-b705-ff14dbe30dcf |      | fa:16:3e:66:fc:c3 | {"subnet_id": "7106b080-dbd4-4a68-9379-2d4ed393de3c", "ip_address": "172.16.1.1"}     |
+| 9bea74c7-6bc9-4667-8b17-60a75309c3bf |      | fa:16:3e:84:f9:05 | {"subnet_id": "689d7fab-c959-47f9-9a2b-372507cd74c9", "ip_address": "192.168.10.102"} |
++--------------------------------------+------+-------------------+---------------------------------------------------------------------------------------+
+
 $ ping -c 4 ROUTER_IP
 ```
 - Create m1.nano flavor
+```
+$ openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
+```
 - Generate a key pair
+```
+$ . demo-openrc
+$ ssh-keygen -q -N ""
+$ openstack keypair create --public-key ~/.ssh/id_rsa.pub mykey
+$ openstack keypair list
++-------+-------------------------------------------------+
+| Name  | Fingerprint                                     |
++-------+-------------------------------------------------+
+| mykey | f9:be:e9:49:5a:0a:d2:5c:0e:95:c0:59:16:4d:59:f1 |
++-------+-------------------------------------------------+
+```
 - Add security group rules
+```
+$ openstack security group rule create --proto icmp default
+$ openstack security group rule create --proto tcp --dst-port 22 default
+```
 - Launch an instance
+  - Determine instance options
+```
+$ . demo-openrc
+$ openstack flavor list
+$ openstack image list
+$ openstack network list
++--------------------------------------+-------------+--------------------------------------+
+| ID                                   | Name        | Subnets                              |
++--------------------------------------+-------------+--------------------------------------+
+| 6d961263-dcdf-4a84-97a9-5a6f27cdbe2d | provider    | 689d7fab-c959-47f9-9a2b-372507cd74c9 |
+| e5ad9c4a-fedd-4e6b-a8c0-d8d9d200e22d | selfservice | 7106b080-dbd4-4a68-9379-2d4ed393de3c |
++--------------------------------------+-------------+--------------------------------------+
+$ openstack security group list
+$ openstack server create --flavor m1.tiny --image cirros \
+  --nic net-id=SELFSERVICE_NET_ID --security-group default \       # changeit: SELFSERVICE_NET_ID (e5ad9c4a-fedd-4e6b-a8c0-d8d9d200e22d)
+  --key-name mykey selfservice-instance
+$ openstack server list  
++--------------------------------------+----------------------+--------+------------------------+
+| ID                                   | Name                 | Status | Networks               |
++--------------------------------------+----------------------+--------+------------------------+
+| afb6f7ee-dfda-400b-8d72-7407af10725f | selfservice-instance | ACTIVE | selfservice=172.16.1.3 |
++--------------------------------------+----------------------+--------+------------------------+  
+```
+  - Access the instance using a virtual console
+```
+$ openstack console url show selfservice-instance
++-------+---------------------------------------------------------------------------------+
+| Field | Value                                                                           |
++-------+---------------------------------------------------------------------------------+
+| type  | novnc                                                                           |
+| url   | http://controller:6080/vnc_auto.html?token=868ec864-5325-45f3-9fb5-f3a1d2c15938 |
++-------+---------------------------------------------------------------------------------+
+```
+    - Use web browser ans open the VNC url
+    - check network in the VNC
+```
+$ ping -c 4 172.16.1.1
+$ ping -c 4 openstack.org
+```
+  - Access the instance remotely
+```
+$ openstack ip floating create provider
++-------------+--------------------------------------+
+| Field       | Value                                |
++-------------+--------------------------------------+
+| fixed_ip    | None                                 |
+| id          | d7ca5d0b-28bc-49e7-a6eb-4bfbc28f3ebd |
+| instance_id | None                                 |
+| ip          | 192.168.10.103                       |
+| pool        | provider                             |
++-------------+--------------------------------------+
+
+$ openstack ip floating add 192.168.10.103 selfservice-instance  # change the ip 
+$ openstack server list
++--------------------------------------+----------------------+--------+----------------------------------------+
+| ID                                   | Name                 | Status | Networks                               |
++--------------------------------------+----------------------+--------+----------------------------------------+
+| afb6f7ee-dfda-400b-8d72-7407af10725f | selfservice-instance | ACTIVE | selfservice=172.16.1.3, 192.168.10.103 |
++--------------------------------------+----------------------+--------+----------------------------------------+
+
+$ ping -c 4 192.168.10.103
+$ ssh cirros@192.168.10.103
+```
 - Block Storage
 - Orchestration
 - Shared File Systems
