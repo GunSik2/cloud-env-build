@@ -465,6 +465,44 @@ $ neutron agent-list
 +--------------------------------------+--------------------+------------+-------------------+-------+----------------+---------------------------+
 ```
 
+
+## 7. Dashboard  on Controller node
+### Install and configure
+- Install and configure components
+```
+# apt-get install openstack-dashboard -y
+
+# vi /etc/openstack-dashboard/local_settings.py
+OPENSTACK_HOST = "controller"
+ALLOWED_HOSTS = ['*', ]
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+CACHES = {
+    'default': {
+         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+         'LOCATION': 'controller:11211',
+    }
+}
+OPENSTACK_KEYSTONE_URL = "http://%s:5000/v3" % OPENSTACK_HOST
+OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True
+OPENSTACK_API_VERSIONS = {
+    "identity": 3,
+    "image": 2,
+    "volume": 2,
+}
+OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = "default"
+OPENSTACK_KEYSTONE_DEFAULT_ROLE = "user"
+TIME_ZONE = "Asia/Seoul"
+```
+- Finalize installation
+```
+# service apache2 reload
+```
+### Verify operation
+- Access the dashboard using a web browser at  http://controller/horizon
+- Authenticate using admin or demo user and default domain credentials
+### Next steps
+
+
 ### Launch an instance
 
 #### Create virtual networks on Controller node
@@ -586,10 +624,9 @@ $ openstack console url show selfservice-instance
 | type  | novnc                                                                           |
 | url   | http://controller:6080/vnc_auto.html?token=868ec864-5325-45f3-9fb5-f3a1d2c15938 |
 +-------+---------------------------------------------------------------------------------+
-```
-  - Use web browser ans open the VNC url
-  - check network in the VNC
-```
+
+### Use web browser ans open the VNC url & check network in the VNC
+
 $ ping -c 4 172.16.1.1
 $ ping -c 4 openstack.org
 ```
