@@ -14,7 +14,7 @@
 
 ## 2. Environment
 ### Security
-- Create password file
+- Create password file & copy it to all nodes
 ```
 echo "ADMIN_PASS=$(openssl rand -hex 10)
 CEILOMETER_DBPASS=$(openssl rand -hex 10)
@@ -34,7 +34,10 @@ NEUTRON_PASS=$(openssl rand -hex 10)
 NOVA_DBPASS=$(openssl rand -hex 10)
 NOVA_PASS=$(openssl rand -hex 10)
 RABBIT_PASS=$(openssl rand -hex 10)
-SWIFT_PASS=$(openssl rand -hex 10)" > password.sh
+SWIFT_PASS=$(openssl rand -hex 10)
+ADMIN_TOKEN=$(opensll rand -hex 10)" > password.sh
+
+. password.sh
 ```
 ### Host networking
 - Controller
@@ -72,18 +75,17 @@ iface eth1 inet dhcp
 ### NTP 
 ### OpenStack packages on All nodes
 ```
-# apt-get install software-properties-common
+# apt-get install software-properties-common -y
 # add-apt-repository cloud-archive:mitaka
-# apt-get update && apt-get dist-upgrade
-# apt-get install python-openstackclient
+# apt-get update && apt-get dist-upgrade -y
+# apt-get install python-openstackclient -y
 ```
 ### Controller nodes
 - SQL database
 ```
-# apt-get install mariadb-server python-pymysql
+# apt-get install mariadb-server python-pymysql -y
 # vi /etc/mysql/conf.d/openstack.cnf
 [mysqld]
-...
 bind-address = 10.0.0.11
 default-storage-engine = innodb
 innodb_file_per_table
@@ -96,17 +98,108 @@ character-set-server = utf8
 ```
 - Message queue : RABBIT_PASS
 ```
-# apt-get install rabbitmq-server
+# echo $RABBIT_PASS
+# apt-get install rabbitmq-server -y
 # rabbitmqctl add_user openstack $RABBIT_PASS
 # rabbitmqctl set_permissions openstack ".*" ".*" ".*"
 ```
 - Memcached
 ```
-# apt-get install memcached python-memcache
+# apt-get install memcached python-memcache -y
 # vi /etc/memcached.conf
 -l 10.0.0.11  # 127.0.0.1 to controller
 # service memcached restart
 ```
 
-## 3. Identity Service
-###
+## 3. Identity Service on Controller
+### Overview
+The Identity service contains these components:
+- Server : A centralized server provides authentication and authorization services using a RESTful interface
+- Drivers : Drivers or a service back end (for example, SQL databases or LDAP servers).
+- Modules : Modules intercept service requests, extract user credentials, and send them to the centralized server for authorization
+
+### Install and configure
+- Prerequisites : KEYSTONE_DBPASS
+```
+$ echo $KEYSTONE_DBPASS
+$ mysql -u root -p 
+CREATE DATABASE keystone;
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY 'KEYSTONE_DBPASS';
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY 'KEYSTONE_DBPASS'
+```
+
+- Install and configure components : ADMIN_TOKEN, KEYSTONE_DBPASS
+```
+# echo "manual" > /etc/init/keystone.override
+# apt-get install keystone apache2 libapache2-mod-wsgi -y
+# echo $ADMIN_TOKEN $KEYSTONE_DBPASS
+
+# vi /etc/keystone/keystone.conf
+[DEFAULT]
+admin_token = ADMIN_TOKEN
+[database]
+connection = mysql+pymysql://keystone:KEYSTONE_DBPASS@controller/keystone
+[token]
+provider = fernet
+
+# su -s /bin/sh -c "keystone-manage db_sync" keystone
+# keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+```
+- Configure the Apache HTTP server
+```
+# vi /etc/apache2/sites-available/wsgi-keystone.conf
+ServerName controller
+Listen 5000
+Listen 35357
+
+<VirtualHost *:5000>
+    WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP}
+    WSGIProcessGroup keystone-public
+    WSGIScriptAlias / /usr/bin/keystone-wsgi-public
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    ErrorLogFormat "%{cu}t %M"
+    ErrorLog /var/log/apache2/keystone.log
+    CustomLog /var/log/apache2/keystone_access.log combined
+
+    <Directory /usr/bin>
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+<VirtualHost *:35357>
+    WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP}
+    WSGIProcessGroup keystone-admin
+    WSGIScriptAlias / /usr/bin/keystone-wsgi-admin
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    ErrorLogFormat "%{cu}t %M"
+    ErrorLog /var/log/apache2/keystone.log
+    CustomLog /var/log/apache2/keystone_access.log combined
+
+    <Directory /usr/bin>
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+# ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
+```
+- Finalize the installation
+```
+# service apache2 restart
+# rm -f /var/lib/keystone/keystone.db
+```
+### Create the service entity and API endpoints
+- Prerequisites
+```
+$ export OS_TOKEN=$ADMIN_TOKEN
+$ export OS_URL=http://controller:35357/v3
+$ export OS_IDENTITY_API_VERSION=3
+```
+- Create the service entity and API endpoints
+```
+$ openstack service create --name keystone --description "OpenStack Identity" identity
+$ openstack endpoint create --region RegionOne identity public http://controller:5000/v3
+$ openstack endpoint create --region RegionOne identity internal http://controller:5000/v3
+$ openstack endpoint create --region RegionOne identity admin http://controller:35357/v3  
+```
