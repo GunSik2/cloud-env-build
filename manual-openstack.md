@@ -340,4 +340,17 @@ flavor = keystone
 # service glance-api restart
 ```
 ### Verify operation
-
+```
+$ . admin-openrc
+$ wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+$ openstack image create "cirros" \
+  --file cirros-0.3.4-x86_64-disk.img \
+  --disk-format qcow2 --container-format bare \
+  --public
+$ openstack image list
++--------------------------------------+--------+--------+
+| ID                                   | Name   | Status |
++--------------------------------------+--------+--------+
+| 50e86a69-2e39-4348-af32-cd5a42ade9f0 | cirros | active |
++--------------------------------------+--------+--------+
+```
