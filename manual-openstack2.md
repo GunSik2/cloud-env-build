@@ -265,6 +265,8 @@ extension_drivers = port_security
 
 [ml2_type_flat]
 flat_networks = provider
+
+[ml2_type_vxlan]
 vni_ranges = 1:1000
 
 [securitygroup]
@@ -465,4 +467,64 @@ $ neutron agent-list
 
 ### Launch an instance
 
+- Create virtual networks on Controller node
+  - Create provider network : START_IP_ADDRESS, END_IP_ADDRESS, DNS_RESOLVER, PROVIDER_NETWORK_GATEWAY, PROVIDER_NETWORK_CIDR 
+```
+$ . admin-openrc
+$ neutron net-create --shared --provider:physical_network provider \
+  --provider:network_type flat provider
+$ neutron subnet-create --name provider \
+  --allocation-pool start=START_IP_ADDRESS,end=END_IP_ADDRESS \
+  --dns-nameserver DNS_RESOLVER --gateway PROVIDER_NETWORK_GATEWAY \
+  provider PROVIDER_NETWORK_CIDR
 
+(case1) public ip
+$ neutron subnet-create --name provider \
+  --allocation-pool start=203.0.113.101,end=203.0.113.250 \
+  --dns-nameserver 8.8.4.4 --gateway 203.0.113.1 \
+  provider 203.0.113.0/24
+
+(case2) private ip
+$ neutron subnet-create --name provider \
+  --allocation-pool start=192.168.10.101,end=192.168.10.250 \
+  --dns-nameserver 8.8.8.8 --gateway 192.168.10.1 \
+  provider 192.168.10.0/24    
+```
+  - Create Self-service network
+    - Create the self-service network
+```
+$ . demo-openrc
+$ neutron net-create selfservice
+$ neutron subnet-create --name selfservice \
+  --dns-nameserver DNS_RESOLVER --gateway SELFSERVICE_NETWORK_GATEWAY \
+  selfservice SELFSERVICE_NETWORK_CIDR
+  
+(case1) 
+$ neutron subnet-create --name selfservice \
+  --dns-nameserver 8.8.8.8 --gateway 172.16.1.1 \
+  selfservice 172.16.1.0/24
+```
+    - Create a router
+```  
+$ . admin-openrc
+$ neutron net-update provider --router:external 
+
+$ . demo-openrc
+$ neutron router-create router
+$ neutron router-interface-add router selfservice
+$ neutron router-gateway-set router provider
+```    
+    - Verify operation
+```
+$ . admin-openrc
+$ ip netns
+$ neutron router-port-list router
+$ ping -c 4 ROUTER_IP
+```
+- Create m1.nano flavor
+- Generate a key pair
+- Add security group rules
+- Launch an instance
+- Block Storage
+- Orchestration
+- Shared File Systems
