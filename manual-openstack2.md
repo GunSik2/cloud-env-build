@@ -467,8 +467,8 @@ $ neutron agent-list
 
 ### Launch an instance
 
-- Create virtual networks on Controller node
-  - Create provider network : START_IP_ADDRESS, END_IP_ADDRESS, DNS_RESOLVER, PROVIDER_NETWORK_GATEWAY, PROVIDER_NETWORK_CIDR 
+#### Create virtual networks on Controller node
+- Create provider network : START_IP_ADDRESS, END_IP_ADDRESS, DNS_RESOLVER, PROVIDER_NETWORK_GATEWAY, PROVIDER_NETWORK_CIDR 
 ```
 $ . admin-openrc
 $ neutron net-create --shared --provider:physical_network provider \
@@ -490,8 +490,8 @@ $ neutron subnet-create --name provider \
   --dns-nameserver 8.8.8.8 --gateway 192.168.10.1 \
   provider 192.168.10.0/24    
 ```
-  - Create Self-service network
-    - Create the self-service network
+- Create Self-service network
+  - Create the self-service network
 ```
 $ . demo-openrc
 $ neutron net-create selfservice
@@ -504,7 +504,7 @@ $ neutron subnet-create --name selfservice \
   --dns-nameserver 8.8.8.8 --gateway 172.16.1.1 \
   selfservice 172.16.1.0/24
 ```
-    - Create a router
+  - Create a router
 ```  
 $ . admin-openrc
 $ neutron net-update provider --router:external 
@@ -514,7 +514,7 @@ $ neutron router-create router
 $ neutron router-interface-add router selfservice
 $ neutron router-gateway-set router provider
 ```    
-    - Verify operation
+- Verify operation
 ```
 $ . admin-openrc
 $ ip netns
@@ -532,11 +532,11 @@ $ neutron router-port-list router
 
 $ ping -c 4 ROUTER_IP
 ```
-- Create m1.nano flavor
+#### Create m1.nano flavor
 ```
 $ openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
 ```
-- Generate a key pair
+#### Generate a key pair
 ```
 $ . demo-openrc
 $ ssh-keygen -q -N ""
@@ -548,13 +548,13 @@ $ openstack keypair list
 | mykey | f9:be:e9:49:5a:0a:d2:5c:0e:95:c0:59:16:4d:59:f1 |
 +-------+-------------------------------------------------+
 ```
-- Add security group rules
+#### Add security group rules
 ```
 $ openstack security group rule create --proto icmp default
 $ openstack security group rule create --proto tcp --dst-port 22 default
 ```
-- Launch an instance
-  - Determine instance options
+#### Launch an instance
+- Determine instance options
 ```
 $ . demo-openrc
 $ openstack flavor list
@@ -577,7 +577,7 @@ $ openstack server list
 | afb6f7ee-dfda-400b-8d72-7407af10725f | selfservice-instance | ACTIVE | selfservice=172.16.1.3 |
 +--------------------------------------+----------------------+--------+------------------------+  
 ```
-  - Access the instance using a virtual console
+- Access the instance using a virtual console
 ```
 $ openstack console url show selfservice-instance
 +-------+---------------------------------------------------------------------------------+
@@ -587,13 +587,13 @@ $ openstack console url show selfservice-instance
 | url   | http://controller:6080/vnc_auto.html?token=868ec864-5325-45f3-9fb5-f3a1d2c15938 |
 +-------+---------------------------------------------------------------------------------+
 ```
-    - Use web browser ans open the VNC url
-    - check network in the VNC
+  - Use web browser ans open the VNC url
+  - check network in the VNC
 ```
 $ ping -c 4 172.16.1.1
 $ ping -c 4 openstack.org
 ```
-  - Access the instance remotely
+- Access the instance remotely
 ```
 $ openstack ip floating create provider
 +-------------+--------------------------------------+
@@ -617,6 +617,6 @@ $ openstack server list
 $ ping -c 4 192.168.10.103
 $ ssh cirros@192.168.10.103
 ```
-- Block Storage
-- Orchestration
-- Shared File Systems
+#### Block Storage
+#### Orchestration
+#### Shared File Systems
