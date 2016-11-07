@@ -3,7 +3,39 @@
 ## Reference
 - http://docs.openstack.org/mitaka/install-guide-ubuntu/environment-networking.html
 
-## Environment
+## 1. Overview
+### Node & Service Deployment
+- Node1 - Controller : Horizon, Neutron, Keystone, Glance, Heat
+- Node2 - Compute1 : Nova, Swift, Cinder
+### Networking
+- Self-service networks
+  - provider network : public network
+  - management network : private network
+
+## 2. Environment
+### Security
+- Create password file
+```
+echo "ADMIN_PASS=$(openssl rand -hex 10)
+CEILOMETER_DBPASS=$(openssl rand -hex 10)
+CEILOMETER_PASS=$(openssl rand -hex 10)
+CINDER_DBPASS=$(openssl rand -hex 10)
+CINDER_PASS=$(openssl rand -hex 10)
+DASH_DBPASS=$(openssl rand -hex 10)
+DEMO_PASS=$(openssl rand -hex 10)
+GLANCE_DBPASS=$(openssl rand -hex 10)
+GLANCE_PASS=$(openssl rand -hex 10)
+HEAT_DBPASS=$(openssl rand -hex 10)
+HEAT_DOMAIN_PASS=$(openssl rand -hex 10)
+HEAT_PASS=$(openssl rand -hex 10)
+KEYSTONE_DBPASS=$(openssl rand -hex 10)
+NEUTRON_DBPASS=$(openssl rand -hex 10)
+NEUTRON_PASS=$(openssl rand -hex 10)
+NOVA_DBPASS=$(openssl rand -hex 10)
+NOVA_PASS=$(openssl rand -hex 10)
+RABBIT_PASS=$(openssl rand -hex 10)
+SWIFT_PASS=$(openssl rand -hex 10)" > password.sh
+```
 ### Host networking
 - Controller
   - eth0: 10.0.0.11  (management nw)
@@ -76,3 +108,5 @@ character-set-server = utf8
 # service memcached restart
 ```
 
+## 3. Identity Service
+###
