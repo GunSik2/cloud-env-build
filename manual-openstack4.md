@@ -56,14 +56,20 @@ $ openstack user list
 ### Create virtual networks
 #### Provider network
 - Overview
+
 ![network1-overview](http://docs.openstack.org/mitaka/install-guide-ubuntu/_images/network1-overview.png)
+
 - Connectivity
+
 ![network1-connectivity](http://docs.openstack.org/mitaka/install-guide-ubuntu/_images/network1-connectivity.png)
 
 #### Self-service network 
 - Overview
+
 ![network2-overview](http://docs.openstack.org/mitaka/install-guide-ubuntu/_images/network2-overview.png)
+
 - Connectivity
+
 ![network2-connectivity](http://docs.openstack.org/mitaka/install-guide-ubuntu/_images/network2-connectivity.png)
 
 
