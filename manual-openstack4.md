@@ -1,5 +1,7 @@
-# Test
+# Test installation & Lauch an Instance
 
+## Test Installation
+- Check components
 ```
 $ . admin-openrc
 $ openstack service list
@@ -50,6 +52,22 @@ $ openstack user list
 +----------------------------------+---------+
 ```
 
+## Lauch an instance
+### Create virtual networks
+#### Provider network
+- Overview
+![network1-overview](http://docs.openstack.org/mitaka/install-guide-ubuntu/_images/network1-overview.png)
+- Connectivity
+![network1-connectivity](http://docs.openstack.org/mitaka/install-guide-ubuntu/_images/network1-connectivity.png)
+
+#### Self-service network 
+- Overview
+![network2-overview](http://docs.openstack.org/mitaka/install-guide-ubuntu/_images/network2-overview.png)
+- Connectivity
+![network2-connectivity](http://docs.openstack.org/mitaka/install-guide-ubuntu/_images/network2-connectivity.png)
+
+
+### Create an instance
 ```
 $ . admin-openrc
 $ wget http://cloud-images.ubuntu.com/trusty/current/trusty-server-cloudimg-amd64-disk1.img
